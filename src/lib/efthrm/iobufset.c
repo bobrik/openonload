@@ -195,7 +195,7 @@ static int oo_bufpage_huge_alloc(struct oo_buffer_pages *p, int *flags)
 
   down_read(&current->mm->mmap_sem);
   rc = get_user_pages((unsigned long)uaddr, 1,
-                      1/*write*/, 0/*force*/, &(p->pages[0]), NULL);
+                      FOLL_WRITE, &(p->pages[0]), NULL);
   up_read(&current->mm->mmap_sem);
   if (rc < 0)
     goto fail2;
@@ -243,7 +243,7 @@ static void oo_bufpage_huge_free(struct oo_buffer_pages *p)
   oo_iobufset_kfree(p);
 }
 #endif
- 
+
 
 /************** Alloc/free page set ****************/
 
@@ -334,7 +334,7 @@ static int oo_bufpage_alloc(struct oo_buffer_pages **pages_out,
     }
     memset(page_address(pages->pages[i]), 0, PAGE_SIZE << low_order);
   }
-  
+
   *pages_out = pages;
   return 0;
 }

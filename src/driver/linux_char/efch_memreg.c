@@ -231,7 +231,7 @@ memreg_rm_alloc(ci_resource_alloc_t* alloc_,
   down_read(&current->mm->mmap_sem);
   for (mr->n_pages = 0; mr->n_pages < max_pages; mr->n_pages += rc) {
     rc = get_user_pages(first_page + mr->n_pages * PAGE_SIZE,
-                        max_pages - mr->n_pages, 1, 0,
+                        max_pages - mr->n_pages, FOLL_WRITE,
                         mr->pages + mr->n_pages, NULL);
     if (rc <= 0) {
       EFCH_ERR("%s: ERROR: get_user_pages(%d) returned %d",
@@ -248,13 +248,13 @@ memreg_rm_alloc(ci_resource_alloc_t* alloc_,
 
   /* Take the order of the first page as our order to start with. */
   comp_order = compound_order(mr->pages[0]);
-  
+
   /* If the size of the memreg isn't a multiple of pages of mr->order we
    * know there must be pages of a different order present.
    */
   if (comp_order != 0 && (mr->n_pages & (((1 << comp_order) - 1))) != 0)
     comp_order = 0;
-   
+
   /* Check the rest of the pages, to ensure that they're all the right order,
    * otherwise just use order 0.
    */

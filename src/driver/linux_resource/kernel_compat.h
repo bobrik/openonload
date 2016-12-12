@@ -214,10 +214,4 @@ static inline int iommu_unmap_my(struct iommu_domain *domain,
 #  define NOPAGE_SIGBUS (NULL)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
-#define get_user_pages(start, nr_pages, write, force, pages, vmas)  \
-    get_user_pages(current, current->mm,                            \
-                   start, nr_pages, write, force, pages, vmas)
-#endif
-
 #endif /* DRIVER_LINUX_RESOURCE_KERNEL_COMPAT_H */
