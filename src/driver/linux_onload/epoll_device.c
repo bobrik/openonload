@@ -556,7 +556,7 @@ static int oo_epoll2_action(struct oo_epoll_private *priv,
 #ifdef __NR_epoll_pwait
       if (op->rc == -EINTR) {
         memcpy(&current->saved_sigmask, &sigsaved, sizeof(sigsaved));
-#ifdef HAVE_SET_RESTORE_SIGMASK
+#ifndef TIF_RESTORE_SIGMASK
         set_restore_sigmask();
 #else
         set_thread_flag(TIF_RESTORE_SIGMASK);
@@ -784,7 +784,7 @@ static void oo_epoll_prime_all_stacks(struct oo_epoll_private* priv)
   int i;
   tcp_helper_resource_t* thr;
   ci_netif* ni;
-  
+
   OO_EPOLL_FOR_EACH_STACK(priv, i, thr, ni) {
     tcp_helper_request_wakeup(thr);
   }
@@ -995,7 +995,7 @@ static long oo_epoll_fop_unlocked_ioctl(struct file* filp,
     rc = 0;
     if( oo_epoll_add_stack(priv, sock_priv->thr) )
       rc = -ENOSPC;
-    
+
     fput(sock_file);
     break;
   }
@@ -1078,7 +1078,7 @@ static long oo_epoll_fop_unlocked_ioctl(struct file* filp,
     if( local_arg.flags & OO_EPOLL1_HAS_SIGMASK ) {
       if( signal_pending(current) ) {
         memcpy(&current->saved_sigmask, &sigsaved, sizeof(sigsaved));
-#ifdef HAVE_SET_RESTORE_SIGMASK
+#ifndef TIF_RESTORE_SIGMASK
         set_restore_sigmask();
 #else
         set_thread_flag(TIF_RESTORE_SIGMASK);
@@ -1282,4 +1282,3 @@ void oo_epoll_chrdev_dtor(void)
 }
 
 #endif
-
