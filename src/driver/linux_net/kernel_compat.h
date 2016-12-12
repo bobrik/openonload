@@ -1333,11 +1333,6 @@
 			PCI_ANY_ID, d)) != NULL)
 #endif
 
-#ifndef DEFINE_PCI_DEVICE_TABLE
-	#define DEFINE_PCI_DEVICE_TABLE(_table) \
-		const struct pci_device_id _table[] __devinitdata
-#endif
-
 #ifdef EFX_NEED_LM87_DRIVER
 #ifdef EFX_HAVE_OLD_I2C_DRIVER_PROBE
 int efx_lm87_probe(struct i2c_client *client);

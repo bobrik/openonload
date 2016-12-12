@@ -129,7 +129,7 @@ unsigned long efrm_pt_iova_base;
  * PCI IDs and init
  *
  ****************************************************************************/
-static DEFINE_PCI_DEVICE_TABLE(efrm_pci_vf_table) = {
+static const struct pci_device_id efrm_pci_vf_table[] = {
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x1000 | 0x0803)},/* SFC9020 */
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x1000 | 0x0813)},/* SFL9021 */
 	{0}			/* end of list */
@@ -356,7 +356,7 @@ static int vf_refresh_status(struct vf_init_status *vf_ini)
 		 * peer.
 		 */
 		memcpy(vf->mac_addr, status->peers->mac_addr, ETH_ALEN);
- 
+
 		vf->vi_scale = status->vi_scale;
 		EFRM_ASSERT((1 << vf->vi_scale) <= EFRM_VF_MAX_VI_COUNT);
 		vf->vi_count = 1 << vf->vi_scale;
@@ -505,7 +505,7 @@ static int check_intel_iommu_bind_once(void)
 			 O_EXCL, S_IRWXU);
 	if (IS_ERR(file)) {
 		claim_vf = 0;
-		EFRM_WARN("%s", iommu_err3);	
+		EFRM_WARN("%s", iommu_err3);
 		EFRM_WARN("At your own risk disable this safety check;"
 			  " rm '%s'", sfc_resource_vfs_bound);
 		return 0;
@@ -1333,7 +1333,7 @@ static int efrm_check_ksym(void *data, const char *name, struct module *mod,
 void *efrm_find_ksym(const char *name)
 {
 	struct efrm_ksym_name t;
-        
+
 	t.name = name;
 	t.addr = NULL;
 	kallsyms_on_each_symbol(efrm_check_ksym, &t);
@@ -1342,5 +1342,3 @@ void *efrm_find_ksym(const char *name)
 EXPORT_SYMBOL(efrm_find_ksym);
 
 #endif  /* ERFM_HAVE_NEW_KALLSYMS */
-
-
