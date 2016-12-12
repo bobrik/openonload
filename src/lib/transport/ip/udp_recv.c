@@ -23,7 +23,7 @@
 ** </L5_PRIVATE>
 *//*
 \**************************************************************************/
-  
+
 /*! \cidoxg_lib_transport_ip */
 
 #define _GNU_SOURCE  /* for recvmmsg */
@@ -135,8 +135,8 @@ struct oo_copy_state {
 };
 
 ci_inline int
-__oo_copy_frag_to_iovec_no_adv(ci_netif* ni, 
-                               ci_iovec_ptr* piov, 
+__oo_copy_frag_to_iovec_no_adv(ci_netif* ni,
+                               ci_iovec_ptr* piov,
                                struct oo_copy_state *ocs)
 {
   int n;
@@ -146,12 +146,12 @@ __oo_copy_frag_to_iovec_no_adv(ci_netif* ni,
   if(CI_UNLIKELY( do_copy(CI_IOVEC_BASE(&piov->io),
                           ocs->from + ocs->pkt_off, n) != 0 ))
     return -EFAULT;
-  
+
   ocs->bytes_copied += n;
   ocs->pkt_off += n;
   if( n == ocs->bytes_to_copy )
     return 0;
-  
+
   ocs->bytes_to_copy -= n;
   if( n == ocs->pkt_left ) {
     /* Caller guarantees that packet contains at least [bytes_to_copy]. */
@@ -164,7 +164,7 @@ __oo_copy_frag_to_iovec_no_adv(ci_netif* ni,
      */
     return 1;
   }
-  
+
   ci_assert_equal(n, CI_IOVEC_LEN(&piov->io));
   if( piov->iovlen == 0 )
     return 0;
@@ -211,7 +211,7 @@ oo_copy_pkt_to_iovec_no_adv(ci_netif* ni, const ci_ip_pkt_fmt* pkt,
 
 #ifndef __KERNEL__
 /* Very similar to oo_copy_pkt_to_iovec_no_adv() but doesn't use pkt->buf */
-static int 
+static int
 ci_udp_timestamp_q_pkt_to_iovec(ci_netif* ni, const ci_ip_pkt_fmt* pkt,
                                 ci_iovec_ptr* piov)
 {
@@ -245,7 +245,7 @@ ci_udp_timestamp_q_pkt_to_iovec(ci_netif* ni, const ci_ip_pkt_fmt* pkt,
 #ifndef __KERNEL__
 /* Max number of iovecs needed:
  * = max_datagram / (min_mtu - udp_header)
- * = 65536 / (576 - 28) 
+ * = 65536 / (576 - 28)
  * = 120
  */
 #define CI_UDP_ZC_IOVEC_MAX 120
@@ -269,14 +269,14 @@ static void ci_udp_pkt_to_zc_msg(ci_netif* ni, ci_ip_pkt_fmt* pkt,
     frag = PKT_CHK_NNL(ni, frag->frag_next);
 
   do {
-    zc_msg->iov[i].iov_len = CI_MIN(oo_offbuf_left(&frag->buf), 
+    zc_msg->iov[i].iov_len = CI_MIN(oo_offbuf_left(&frag->buf),
                                     bytes_left);
     zc_msg->iov[i].iov_base = oo_offbuf_ptr(&frag->buf);
     zc_msg->iov[i].buf = (onload_zc_handle)handle_frag;
     zc_msg->iov[i].iov_flags = 0;
     bytes_left -= zc_msg->iov[i].iov_len;
     ++i;
-    if( OO_PP_IS_NULL(frag->frag_next) || 
+    if( OO_PP_IS_NULL(frag->frag_next) ||
         (i == CI_UDP_ZC_IOVEC_MAX) ||
         (bytes_left == 0) )
       break;
@@ -395,7 +395,7 @@ static int __ci_udp_recvmsg_try_os(ci_netif *ni, ci_udp_state *us,
   kmsg.msg_namelen = 0;
   kmsg.msg_name = NULL;
   kmsg.msg_controllen = 0;
-  rc = sock_recvmsg(sock, &kmsg, total_bytes, flags | MSG_DONTWAIT);
+  rc = sock_recvmsg(sock, &kmsg, flags | MSG_DONTWAIT);
   /* Clear OS RX flag if we've got everything  */
   oo_os_sock_status_bit_clear_handled(&us->s, os_sock, OO_OS_STATUS_RX);
   oo_os_sock_put(os_sock);
@@ -471,7 +471,7 @@ static int ci_udp_recvmsg_socklocked_slowpath(ci_udp_recv_info* rinf,
 
       /* TODO is this necessary? - mirroring ci_udp_recvmsg_get() */
       ci_rmb();
-      
+
       pkt = ci_udp_recv_q_get(ni, &us->timestamp_q);
 
       cmsg_state.msg = rinf->msg;
@@ -542,7 +542,7 @@ static int ci_udp_recvmsg_socklocked_slowpath(ci_udp_recv_info* rinf,
     return rc;
   }
 #endif
-#if CI_CFG_POSIX_RECV  
+#if CI_CFG_POSIX_RECV
   if( ! udp_lport_be16(us)) {
     LOG_UV(log("%s: -1 (ENOTCONN)", __FUNCTION__));
     CI_SET_ERROR(rc, ENOTCONN);
@@ -573,7 +573,7 @@ struct recvmsg_spinstate {
 };
 
 
-static int 
+static int
 ci_udp_recvmsg_block(ci_udp_iomsg_args* a, ci_netif* ni, ci_udp_state* us,
                      int timeout)
 {
@@ -622,7 +622,7 @@ ci_udp_recvmsg_block(ci_udp_iomsg_args* a, ci_netif* ni, ci_udp_state* us,
              timeout == -1 ) {
       /* Blocking recv() should only be restarted if there is no timeout. */
       goto continue_to_block;
-    } else 
+    } else
       rc = -errno;
 
     return rc;
@@ -684,7 +684,7 @@ ci_udp_recvmsg_socklocked_spin(ci_udp_iomsg_args* a,
       if( ! ni->state->is_spinner )
         ni->state->is_spinner = 1;
     }
-    return OO_SPINLOOP_PAUSE_CHECK_SIGNALS(ni, now_frc, 
+    return OO_SPINLOOP_PAUSE_CHECK_SIGNALS(ni, now_frc,
                                            &spin_state->schedule_frc,
                                            us->s.so.rcvtimeo_msec,
                                            &us->s.b, spin_state->si);
@@ -712,7 +712,7 @@ ci_udp_recvmsg_socklocked_spin(ci_udp_iomsg_args* a,
 }
 
 
-static int 
+static int
 ci_udp_recvmsg_common(ci_udp_recv_info *rinf)
 {
   ci_netif* ni = rinf->a->ni;
@@ -746,7 +746,7 @@ ci_udp_recvmsg_common(ci_udp_recv_info *rinf)
 	  (rinf->msg->msg_iovlen == 0              ) |
 	  (rinf->msg->msg_iov == NULL              ) |
 	  (ni->state->rxq_low                      ) |
-#if CI_CFG_POSIX_RECV  
+#if CI_CFG_POSIX_RECV
 	  (udp_lport_be16(us) == 0                 ) |
 #endif
 	  (us->s.so_error                          ));
@@ -755,7 +755,7 @@ ci_udp_recvmsg_common(ci_udp_recv_info *rinf)
 
  back_to_fast_path:
   ci_iovec_ptr_init_nz(&piov, rinf->msg->msg_iov, rinf->msg->msg_iovlen);
-  
+
  piov_inited:
   if(CI_UNLIKELY( us->udpflags & CI_UDPF_PEEK_FROM_OS ))
     goto peek_from_os;
@@ -814,10 +814,10 @@ ci_udp_recvmsg_common(ci_udp_recv_info *rinf)
 
   /* We need to block (optionally spinning first). */
 
-#ifndef __KERNEL__    
+#ifndef __KERNEL__
   /* -1 is special value for uninitialised */
   if( spin_state.do_spin == -1 ) {
-    spin_state.do_spin = 
+    spin_state.do_spin =
       oo_per_thread_get()->spinstate & (1 << ONLOAD_SPIN_UDP_RECV);
 
     if( spin_state.do_spin ) {
@@ -864,7 +864,7 @@ ci_udp_recvmsg_common(ci_udp_recv_info *rinf)
 
  slow_path:
   rc = ci_udp_recvmsg_socklocked_slowpath(rinf, &piov);
-  if( rc == 0 ) 
+  if( rc == 0 )
     goto back_to_fast_path;
   else if( rc == SLOWPATH_RET_IOVLEN_INITED )
     goto piov_inited;
@@ -878,7 +878,7 @@ ci_udp_recvmsg_common(ci_udp_recv_info *rinf)
  peek_from_os:
   if( ci_udp_recvmsg_try_os(rinf, &rc) )
     goto out;
-  
+
   goto check_ul_recv_q;
 }
 
@@ -908,8 +908,8 @@ int ci_udp_recvmsg(ci_udp_iomsg_args *a, ci_msghdr* msg, int flags)
 
 
 #if CI_CFG_RECVMMSG && !defined(__KERNEL__)
-int ci_udp_recvmmsg(ci_udp_iomsg_args *a, struct mmsghdr* mmsg, 
-                    unsigned int vlen, int flags, 
+int ci_udp_recvmmsg(ci_udp_iomsg_args *a, struct mmsghdr* mmsg,
+                    unsigned int vlen, int flags,
                     const struct timespec* timeout)
 {
   ci_netif* ni = a->ni;
@@ -929,7 +929,7 @@ int ci_udp_recvmmsg(ci_udp_iomsg_args *a, struct mmsghdr* mmsg,
   }
 
   i = 0;
-  while( i < vlen && timeout_msec != 0 ) { 
+  while( i < vlen && timeout_msec != 0 ) {
     rinf.msg = &mmsg[i].msg_hdr;
     rc = ci_udp_recvmsg_common(&rinf);
     if( rc >= 0 ) {
@@ -954,7 +954,7 @@ int ci_udp_recvmmsg(ci_udp_iomsg_args *a, struct mmsghdr* mmsg,
 
     if( rinf.flags & MSG_WAITFORONE )
       rinf.flags |= MSG_DONTWAIT;
-    
+
     if( timeout_msec > 0 ) {
       struct timeval tv_after, tv_sub;
       gettimeofday(&tv_after, NULL);
@@ -971,7 +971,7 @@ int ci_udp_recvmmsg(ci_udp_iomsg_args *a, struct mmsghdr* mmsg,
 
   if( rinf.sock_locked )
     ci_sock_unlock(ni, &us->s.b);
-  
+
   return i;
 }
 #endif
@@ -980,7 +980,7 @@ int ci_udp_recvmmsg(ci_udp_iomsg_args *a, struct mmsghdr* mmsg,
 #ifndef __KERNEL__
 
 static int ci_udp_zc_recv_from_os(ci_netif* ni, ci_udp_state* us,
-                                  struct onload_zc_recv_args* args, 
+                                  struct onload_zc_recv_args* args,
                                   enum onload_zc_callback_rc* cb_rc)
 {
 #define ZC_BUFFERS_FOR_64K_DATAGRAM                                     \
@@ -996,7 +996,7 @@ static int ci_udp_zc_recv_from_os(ci_netif* ni, ci_udp_state* us,
 
   if( us->zc_kernel_datagram_count < ZC_BUFFERS_FOR_64K_DATAGRAM) {
     /* We've not come this way before, so allocate enough packet bufs
-     * to hold max size UDP datagram 
+     * to hold max size UDP datagram
      */
     ci_netif_lock(ni);
     while( us->zc_kernel_datagram_count < ZC_BUFFERS_FOR_64K_DATAGRAM ) {
@@ -1035,7 +1035,7 @@ static int ci_udp_zc_recv_from_os(ci_netif* ni, ci_udp_state* us,
   msg.msg_flags = 0;
 
   ci_assert(us->s.os_sock_status & OO_OS_STATUS_RX);
-  i = __ci_udp_recvmsg_try_os(ni, us, &msg, 
+  i = __ci_udp_recvmsg_try_os(ni, us, &msg,
                               args->flags & ONLOAD_ZC_RECV_FLAGS_PTHRU_MASK,
                               &rc);
   ci_assert_equal(i, 1);
@@ -1043,9 +1043,9 @@ static int ci_udp_zc_recv_from_os(ci_netif* ni, ci_udp_state* us,
 
   /* We now have to translate the result from OS recvmsg - stored as
    * an iovec - into something we can pass to the callback, stored in
-   * the caller's onload_zc_iovec 
+   * the caller's onload_zc_iovec
    */
-  
+
   i = 0;
   pkt_p = us->zc_kernel_datagram;
   while( rc > 0 ) {
@@ -1063,7 +1063,7 @@ static int ci_udp_zc_recv_from_os(ci_netif* ni, ci_udp_state* us,
   }
 
   /* Clear last packet's frag_next in chain we're passing to callback.
-   * We'll restore it later if they don't keep the buffers  
+   * We'll restore it later if they don't keep the buffers
    */
   pkt->frag_next = OO_PP_NULL;
   /* pkt_p handily points to the buffer after the last one used for
@@ -1086,11 +1086,11 @@ static int ci_udp_zc_recv_from_os(ci_netif* ni, ci_udp_state* us,
   args->msg.msghdr.msg_flags = msg.msg_flags;
 
   cb_flags = 0;
-  if( (ci_udp_recv_q_pkts(&us->recv_q) == 0) && 
+  if( (ci_udp_recv_q_pkts(&us->recv_q) == 0) &&
       (us->s.os_sock_status & OO_OS_STATUS_RX) == 0 )
     cb_flags |= ONLOAD_ZC_END_OF_BURST;
 
-  /* Beware - as soon as we provide the pkts to the callback we can't 
+  /* Beware - as soon as we provide the pkts to the callback we can't
    * touch them anymore as we don't know what the app might be doing with
    * them, such as releasing them.
    */
@@ -1171,15 +1171,15 @@ int ci_udp_zc_recv(ci_udp_iomsg_args* a, struct onload_zc_recv_args* args)
       else
         args->msg.msghdr.msg_controllen = 0;
 
-      ci_udp_recvmsg_fill_msghdr(ni, &args->msg.msghdr, pkt, 
+      ci_udp_recvmsg_fill_msghdr(ni, &args->msg.msghdr, pkt,
                                  &us->s);
 
       ci_udp_pkt_to_zc_msg(ni, pkt, &args->msg);
 
       us->stamp = pkt->pf.udp.rx_stamp;
       us->udpflags |= CI_UDPF_LAST_RECV_ON;
-    
-      cb_flags = CI_IP_IS_MULTICAST(oo_ip_hdr(pkt)->ip_daddr_be32) ? 
+
+      cb_flags = CI_IP_IS_MULTICAST(oo_ip_hdr(pkt)->ip_daddr_be32) ?
         ONLOAD_ZC_MSG_SHARED : 0;
       if( (ci_udp_recv_q_pkts(&us->recv_q) == 1) &&
           ((us->s.os_sock_status & OO_OS_STATUS_RX) == 0) )
@@ -1206,7 +1206,7 @@ int ci_udp_zc_recv(ci_udp_iomsg_args* a, struct onload_zc_recv_args* args)
         goto out;
     }
 
-    if( done_big_poll && done_kernel_poll && 
+    if( done_big_poll && done_kernel_poll &&
         (cb_flags & ONLOAD_ZC_END_OF_BURST) )
       goto out;
 
@@ -1216,7 +1216,7 @@ int ci_udp_zc_recv(ci_udp_iomsg_args* a, struct onload_zc_recv_args* args)
  out:
   ni->state->is_spinner = 0;
   ci_sock_unlock(ni, &us->s.b);
-  
+
   return rc;
 
  empty:
@@ -1224,10 +1224,10 @@ int ci_udp_zc_recv(ci_udp_iomsg_args* a, struct onload_zc_recv_args* args)
     ci_frc64(&spin_state.start_frc);
 
   if( ci_netif_may_poll(ni) &&
-      ci_netif_need_poll_spinning(ni, spin_state.start_frc) && 
+      ci_netif_need_poll_spinning(ni, spin_state.start_frc) &&
       ci_netif_trylock(ni) ) {
     /* If only a few events, we don't need to bother with the full poll */
-    if( ci_netif_poll_n(ni, NI_OPTS(ni).evs_per_poll) < 
+    if( ci_netif_poll_n(ni, NI_OPTS(ni).evs_per_poll) <
         NI_OPTS(ni).evs_per_poll )
       done_big_poll = 1;
 
@@ -1242,7 +1242,7 @@ int ci_udp_zc_recv(ci_udp_iomsg_args* a, struct onload_zc_recv_args* args)
     if( ci_udp_recv_q_not_empty(&us->recv_q) )
       goto not_empty;
 
-  } else 
+  } else
     done_big_poll = 1; /* pretend we did if we can't poll */
 
  spin_loop:
@@ -1312,9 +1312,9 @@ int ci_udp_zc_recv(ci_udp_iomsg_args* a, struct onload_zc_recv_args* args)
 
   /* -1 is special value that means uninitialised */
   if( spin_state.do_spin == -1 ) {
-    spin_state.do_spin = 
+    spin_state.do_spin =
       oo_per_thread_get()->spinstate & (1 << ONLOAD_SPIN_UDP_RECV);
-  
+
     if( spin_state.do_spin ) {
       spin_state.si = citp_signal_get_specific_inited();
       spin_state.max_spin = us->s.b.spin_cycles;
@@ -1332,9 +1332,9 @@ int ci_udp_zc_recv(ci_udp_iomsg_args* a, struct onload_zc_recv_args* args)
 
   if( spin_state.do_spin ) {
     rc = ci_udp_recvmsg_socklocked_spin(a, ni, us, &spin_state);
-    /* 0 => ul maybe readable 
-     * 1 => spin complete 
-     * -ve => error 
+    /* 0 => ul maybe readable
+     * 1 => spin complete
+     * -ve => error
      */
     if( rc == 0 ) {
       if( ci_udp_recv_q_not_empty(&us->recv_q) )

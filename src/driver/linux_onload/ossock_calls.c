@@ -87,7 +87,7 @@ oo_fd_replace_file(struct file* old_filp, struct file* new_filp,
     /* This is a multithreaded application, and someone can be already
      * calling into this endpoint.  We should not remove the ep from under
      * other thread's feet.  UL library will call dup2().
-     * 
+     *
      * See also __fget_light() comments, because sys_ioctl() uses
      * it to obtain the struct file.
      */
@@ -392,7 +392,7 @@ int efab_tcp_helper_os_sock_sendmsg(ci_private_t* priv, void *arg)
       __attribute__ ((aligned(sizeof(__kernel_size_t))));
   unsigned char *ctl_buf = local_ctl;
 
-  ep = ci_trs_get_valid_ep(priv->thr, op->sock_id); 
+  ep = ci_trs_get_valid_ep(priv->thr, op->sock_id);
   sock = get_linux_socket(ep);
   if( sock == NULL )
     return  -EINVAL;
@@ -542,7 +542,7 @@ int efab_tcp_helper_os_sock_recvmsg(ci_private_t* priv, void *arg)
   struct msghdr msg;
   int i, rc;
 
-  ep = ci_trs_get_valid_ep(priv->thr, op->sock_id); 
+  ep = ci_trs_get_valid_ep(priv->thr, op->sock_id);
   sock = get_linux_socket(ep);
   if( sock == NULL )
     return 0;
@@ -608,7 +608,7 @@ int efab_tcp_helper_os_sock_recvmsg(ci_private_t* priv, void *arg)
 
   if( sock->file->f_flags & O_NONBLOCK )
     op->flags |= MSG_DONTWAIT;
-  rc = sock_recvmsg(sock, &msg, total_bytes, op->flags);
+  rc = sock_recvmsg(sock, &msg, op->flags);
   /* Clear OS RX flag if we've got everything  */
   oo_os_sock_status_bit_clear_handled(
             SP_TO_SOCK(&ep->thr->netif, ep->id), sock->file,
@@ -1137,4 +1137,3 @@ int oo_clone_fd(struct file* filp, int do_cloexec)
 
   return new_fd;
 }
-
