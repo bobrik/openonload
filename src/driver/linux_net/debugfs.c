@@ -136,7 +136,7 @@ void efx_fini_debugfs_child(struct dentry *dir, const char *name)
 
 	child_name.len = strlen(name);
 	child_name.name = name;
-	child_name.hash = full_name_hash(child_name.name, child_name.len);
+	child_name.hash = full_name_hash(dir, child_name.name, child_name.len);
 	child = d_lookup(dir, &child_name);
 	if (child) {
 		/* If it's a "regular" file, free its parameter binding */
